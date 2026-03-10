@@ -1,0 +1,43 @@
+.metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mc-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.mc-menu {
+    background: none;
+    color: var(--text-dim);
+    font-size: 16px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.mc-menu:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.mc-value {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.mc-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}

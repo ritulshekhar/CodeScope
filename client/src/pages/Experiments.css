@@ -1,0 +1,114 @@
+.experiments-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.experiments-hero {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.exp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(181, 242, 61, 0.2);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.exp-title {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 14px;
+}
+
+.exp-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+.experiments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.exp-card {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.exp-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 40px rgba(181, 242, 61, 0.1);
+}
+
+.exp-num {
+    font-size: 48px;
+    font-weight: 900;
+    color: rgba(181, 242, 61, 0.1);
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    line-height: 1;
+}
+
+.exp-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.exp-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.exp-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    flex: 1;
+}
+
+.exp-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.exp-date {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.exp-arrow {
+    font-size: 18px;
+    color: var(--accent);
+    transition: transform 0.2s;
+}
+
+.exp-card:hover .exp-arrow {
+    transform: translateX(4px);
+}

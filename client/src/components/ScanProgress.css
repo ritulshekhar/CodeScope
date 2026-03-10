@@ -1,0 +1,123 @@
+.scan-progress-card {
+    padding: 28px;
+    margin-bottom: 32px;
+    border-color: rgba(181, 242, 61, 0.25);
+    animation: glow 2.5s ease-in-out infinite;
+}
+
+.sp-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.sp-pulse {
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 0 4px rgba(181, 242, 61, 0.2);
+}
+
+.sp-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.sp-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.sp-elapsed {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-feature-settings: 'tnum';
+}
+
+/* Progress bar */
+.sp-bar-track {
+    height: 6px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.sp-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 1.6s ease;
+    box-shadow: 0 0 10px rgba(181, 242, 61, 0.4);
+}
+
+.sp-pct {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+/* Steps list */
+.sp-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .sp-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sp-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text-dim);
+    transition: all 0.3s;
+}
+
+.sp-step.done {
+    color: var(--text);
+    background: rgba(6, 214, 160, 0.07);
+}
+
+.sp-step.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(181, 242, 61, 0.2);
+}
+
+.sp-step-icon {
+    font-size: 14px;
+    width: 18px;
+    text-align: center;
+    color: var(--green);
+    flex-shrink: 0;
+}
+
+.sp-step.active .sp-step-icon {
+    color: var(--accent);
+}
+
+.sp-step .sp-step-icon {
+    color: var(--text-dim);
+}
+
+.sp-step.done .sp-step-icon {
+    color: var(--green);
+}
