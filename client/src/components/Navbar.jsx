@@ -1,18 +1,45 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
-// Stateless functional component — displays a single nav link group
+// Stateless functional component — pure presentational, no state
 function NavDropdown({ label, items }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    // Close on outside click
+    useEffect(() => {
+        function handleClick(e) {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
     return (
-        <div className="nav-dropdown">
-            <button className="nav-link">{label} <span className="caret">▾</span></button>
-            <div className="dropdown-menu">
-                {items.map((item, i) => (
-                    <Link key={i} to={item.to} className="dropdown-item">{item.label}</Link>
-                ))}
-            </div>
+        <div className="nav-dropdown" ref={ref}>
+            <button
+                className={`nav-link ${open ? 'active' : ''}`}
+                onClick={() => setOpen(o => !o)}
+                type="button"
+            >
+                {label} <span className="caret">{open ? '▴' : '▾'}</span>
+            </button>
+            {open && (
+                <div className="dropdown-menu show">
+                    {items.map((item, i) => (
+                        <Link
+                            key={i}
+                            to={item.to}
+                            className="dropdown-item"
+                            onClick={() => setOpen(false)}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -20,9 +47,16 @@ function NavDropdown({ label, items }) {
 export default function Navbar() {
     const { isAuthenticated, logout, user } = useAuth();
     const navigate = useNavigate();
-    const [menuOpen, setMenuOpen] = useState(false);   // useState hook
+    const location = useLocation();
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    const handleLogout = () => { logout(); navigate('/'); };
+    // Close mobile menu on route change
+    useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/', { replace: true });
+    };
 
     return (
         <nav className="navbar">
@@ -34,20 +68,19 @@ export default function Navbar() {
 
                 <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
                     <NavDropdown label="Dashboard" items={[
-                        { to: '/dashboard', label: 'Overview' },
-                        { to: '/history', label: 'Scan History' },
+                        { to: '/dashboard', label: '📊 Overview' },
+                        { to: '/history', label: '🕐 Scan History' },
                     ]} />
                     <NavDropdown label="Analysis Reports" items={[
-                        { to: '/dashboard', label: 'Latest Report' },
-                        { to: '/history', label: 'All Reports' },
+                        { to: '/dashboard', label: '📋 Latest Report' },
+                        { to: '/history', label: '📂 All Reports' },
                     ]} />
                     <NavDropdown label="Quality Rules" items={[
-                        { to: '/dashboard', label: 'Run a Scan' },
-                        { to: '/history', label: 'View History' },
+                        { to: '/dashboard', label: '🚀 Run a Scan' },
+                        { to: '/history', label: '📈 View History' },
                     ]} />
                     <NavDropdown label="Documentation" items={[
-                        { to: '/', label: 'Getting Started' },
-                        { to: '/register', label: 'API Reference' },
+                        { to: '/', label: '🏠 Getting Started' },
                     ]} />
                 </div>
 
@@ -55,7 +88,9 @@ export default function Navbar() {
                     {isAuthenticated ? (
                         <>
                             <span className="nav-user">👤 {user?.name}</span>
-                            <button className="btn-outline" onClick={handleLogout}>Logout</button>
+                            <button className="btn-outline" type="button" onClick={handleLogout}>
+                                Logout
+                            </button>
                         </>
                     ) : (
                         <>
@@ -65,7 +100,14 @@ export default function Navbar() {
                     )}
                 </div>
 
-                <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+                <button
+                    className="hamburger"
+                    type="button"
+                    onClick={() => setMenuOpen(o => !o)}
+                    aria-label="Toggle menu"
+                >
+                    {menuOpen ? '✕' : '☰'}
+                </button>
             </div>
         </nav>
     );
