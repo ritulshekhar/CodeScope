@@ -11,6 +11,8 @@ const { calculateRisk, calculateQualityScore } = require('./risk');
 const SUPPORTED_EXTENSIONS = Object.keys(LANG_MAP);
 const IGNORE_DIRS = ['node_modules', '.git', 'dist', 'build', '__pycache__', '.next', 'vendor', 'target'];
 const MAX_FILE_SIZE = 500 * 1024; // 500KB
+const MAX_FILES = 300;           // Cap total files to avoid multi-minute scans
+const MAX_TOTAL_ISSUES = 2000;   // Cap total issues to avoid huge DB inserts
 
 function walkDir(dir, fileList = []) {
     if (!fs.existsSync(dir)) return fileList;
@@ -29,42 +31,52 @@ function walkDir(dir, fileList = []) {
 }
 
 async function analyzeRepo(repoDir) {
-    const files = walkDir(repoDir);
+    const allFiles = walkDir(repoDir);
+    // Cap file count — process at most MAX_FILES to keep scan under ~30s
+    const files = allFiles.slice(0, MAX_FILES);
     const fileReports = [];
     const allIssues = [];
     const langCounts = {};
 
     for (const filePath of files) {
-        const stat = fs.statSync(filePath);
-        if (stat.size > MAX_FILE_SIZE) continue;
+        // Stop accumulating issues if we've already hit the global cap
+        if (allIssues.length >= MAX_TOTAL_ISSUES) break;
 
-        let code;
-        try { code = fs.readFileSync(filePath, 'utf-8'); } catch { continue; }
+        try {
+            const stat = fs.statSync(filePath);
+            if (stat.size > MAX_FILE_SIZE) continue;
 
-        const lang = detectLanguage(filePath);
-        langCounts[lang] = (langCounts[lang] || 0) + 1;
+            let code;
+            try { code = fs.readFileSync(filePath, 'utf-8'); } catch { continue; }
 
-        const loc = countLOC(code);
-        const complexity = calcCyclomaticComplexity(code);
-        const cr = commentRatio(code, lang);
-        const afl = avgFunctionLength(code, lang);
-        const issues = detectIssues(code, path.relative(repoDir, filePath), lang);
+            const lang = detectLanguage(filePath);
+            langCounts[lang] = (langCounts[lang] || 0) + 1;
 
-        const { riskScore, riskLevel } = calculateRisk(issues.length, complexity);
+            const loc = countLOC(code);
+            const complexity = calcCyclomaticComplexity(code);
+            const cr = commentRatio(code, lang);
+            const afl = avgFunctionLength(code, lang);
+            const issues = detectIssues(code, path.relative(repoDir, filePath), lang);
 
-        fileReports.push({
-            filePath: path.relative(repoDir, filePath),
-            language: lang,
-            loc,
-            complexity,
-            commentRatio: cr,
-            avgFunctionLength: afl,
-            issueCount: issues.length,
-            riskScore,
-            riskLevel
-        });
+            const { riskScore, riskLevel } = calculateRisk(issues.length, complexity);
 
-        allIssues.push(...issues);
+            fileReports.push({
+                filePath: path.relative(repoDir, filePath),
+                language: lang,
+                loc,
+                complexity,
+                commentRatio: cr,
+                avgFunctionLength: afl,
+                issueCount: issues.length,
+                riskScore,
+                riskLevel
+            });
+
+            allIssues.push(...issues);
+        } catch {
+            // Skip any file that causes an unexpected error
+            continue;
+        }
     }
 
     const totalLoc = fileReports.reduce((s, f) => s + f.loc, 0);

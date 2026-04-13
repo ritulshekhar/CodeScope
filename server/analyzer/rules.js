@@ -2,6 +2,8 @@
  * Rule Engine - Detects code quality issues
  */
 
+const MAX_ISSUES_PER_FILE = 100;
+
 function detectIssues(code, filePath, lang) {
     const issues = [];
     const lines = code.split('\n');
@@ -72,6 +74,9 @@ function detectIssues(code, filePath, lang) {
     // Unused variable hints (basic)
     detectUnusedVars(code, filePath, lang, issues);
 
+    // Cap issues per file to avoid DB floods and excessive processing
+    if (issues.length > MAX_ISSUES_PER_FILE) issues.length = MAX_ISSUES_PER_FILE;
+
     return issues;
 }
 
@@ -110,13 +115,21 @@ function detectDeepNesting(lines, filePath, lang, issues) {
 
 function detectUnusedVars(code, filePath, lang, issues) {
     if (lang !== 'JavaScript' && lang !== 'TypeScript') return;
+    // Build a frequency map of all identifiers in ONE pass (no per-var regex scan)
+    const freqMap = {};
+    const tokenPattern = /\b([a-zA-Z_$][\w$]*)\b/g;
+    let tok;
+    while ((tok = tokenPattern.exec(code)) !== null) {
+        const w = tok[1];
+        freqMap[w] = (freqMap[w] || 0) + 1;
+    }
     const declPattern = /(?:const|let|var)\s+(\w+)\s*=/g;
     let match;
     while ((match = declPattern.exec(code)) !== null) {
         const varName = match[1];
         if (varName === '_' || varName.startsWith('_')) continue;
-        const usageCount = (code.match(new RegExp(`\\b${varName}\\b`, 'g')) || []).length;
-        if (usageCount === 1) {
+        // Declared once (the declaration itself) means never used elsewhere
+        if ((freqMap[varName] || 0) <= 1) {
             issues.push({ issueType: 'unused-variable', severity: 'Medium', description: `Variable '${varName}' is declared but never used`, line: 0, filePath, language: lang });
         }
     }
